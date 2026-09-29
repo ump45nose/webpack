@@ -265,6 +265,12 @@ When a function's output type depends on its input, use a generic (`@template`) 
 
 Spell names out in full (functions, variables, parameters, properties): `insertHtmlElement` not `insHtmlEl`, `attributeCount` not `attrCnt`, `current` not `cur`, `element` not `el`. Exceptions: abbreviations webpack already uses pervasively (`ast`, `ns`, `id`, `url`, `css`, `js`, `dir`, `env`, `fs`) or spec-defined ones (`afe` — the HTML spec's active formatting elements), and throwaway loop indices (`i`, `j`, `k`). Otherwise write the full word.
 
+**Name a class for its kind, and the file for the class.** Most classes in `lib/` end in the suffix their kind already uses — `*Plugin`, `*Dependency`, `*RuntimeModule`, `*Warning`, `*Error`, `*Module`, `*ParserPlugin`, `*Factory`, `*Generator`, `*Parser`, `*Template` (546 of 668 PascalCase files). A file exporting one class is named after it, and the class after the file. Exempt: core nouns (`Compiler`, `Chunk`), helper and data-structure modules (`SortableSet`), and any module exporting several things, which names its exports instead.
+
+**Three things a name never does:** invent a role suffix (`lib/` has no `*Controller`, `*Manager`, `*Service`, `*Provider`, `*Impl` or `*Util` — a class that controls a thing is the thing); carry a `Webpack` prefix where the bare word is free; or repeat a name another class in `lib/` already uses, since a stack trace and `types.d.ts` show the name alone. A re-export shim is the same class, so it may share the name.
+
+**Renaming a class is safe; what spells the name elsewhere is not.** `instanceof` compares the constructor object, so the identifier is free — a shim (`module.exports = require("<new path>")`) hands back the same object, while re-declaring or extending the class at the old path makes a second constructor nothing matches. Grep the old name first, and leave each of these as it is behind its own `TODO in the next major release`: both halves of a `makeSerializable` key (its request strings and its third `name` argument), an export key in `lib/index.js`, a `RuntimeModule`'s `super("<name>")` and `RuntimeGlobals` keys, option/`buildMeta`/parser-state keys, a dependency's `type` string, and an error's `this.name` or an interpolated `constructor.name`. The first four reach cache packs, the public API or emitted bundles; the last two are printed to users. `internalSerializables.js` regenerating byte-identical proves the serializer keys, `yarn fix:special` and `yarn lint` the rest.
+
 ### Path regexps and helpers live in one file
 
 > [!REQUIRED]
